@@ -4,22 +4,13 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { getNotes } from '@/lib/api';
+import { Note } from '@/types/note'; // <-- Імпортуємо офіційний тип проекту
 import NoteList from '@/components/NoteList/NoteList';
 import SearchBox from '@/components/SearchBox/SearchBox';
 import Pagination from '@/components/Pagination/Pagination';
 import NoteForm from '@/components/NoteForm/NoteForm';
 import Modal from '@/components/Modal/Modal';
 import css from './NotesPage.module.css';
-
-// Додано відсутнє поле updatedAt, щоб відповідати загальному типу проекту
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  tag?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
 
 interface NotesResponse {
   notes: Note[];
