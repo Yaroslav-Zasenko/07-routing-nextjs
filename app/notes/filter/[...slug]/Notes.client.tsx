@@ -11,13 +11,14 @@ import NoteForm from '@/components/NoteForm/NoteForm';
 import Modal from '@/components/Modal/Modal';
 import css from './NotesPage.module.css';
 
-// Інтерфейси для суворої типізації (без будь-якого `any`)
+// Додано відсутнє поле updatedAt, щоб відповідати загальному типу проекту
 interface Note {
   id: string;
   title: string;
   content: string;
   tag?: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 interface NotesResponse {
@@ -46,14 +47,12 @@ export default function NotesClient({ tag }: NotesClientProps): React.ReactEleme
     debouncedSetSearch(query);
   };
 
-  // Використовуємо дженерік <NotesResponse> для useQuery
   const { data, isLoading, isError } = useQuery<NotesResponse>({
     queryKey: ['notes', { tag, page, perPage, search }],
     queryFn: () => getNotes({ tag, page, perPage, search }),
     placeholderData: (previousData) => previousData,
   });
 
-  // Строга типізація без жодних `as any`
   const notes: Note[] = data?.notes ?? [];
   const totalPages: number = data?.totalPages ?? 1;
 
