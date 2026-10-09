@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { getNotes } from '@/lib/api';
@@ -12,12 +11,25 @@ import NoteForm from '@/components/NoteForm/NoteForm';
 import Modal from '@/components/Modal/Modal';
 import css from './NotesPage.module.css';
 
-export default function NotesClient(): React.ReactElement {
-  const params = useParams<{ slug?: string[] }>();
-  const slugArray = params?.slug || ['all'];
-  const currentTag = slugArray[0];
-  const tagFilter = currentTag === 'all' ? undefined : currentTag;
+// Інтерфейси для суворої типізації (без будь-якого `any`)
+interface Note {
+  id: string;
+  title: string;
+  content: string;
+  tag?: string;
+  createdAt?: string;
+}
 
+interface NotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
+
+interface NotesClientProps {
+  tag?: string;
+}
+
+export default function NotesClient({ tag }: NotesClientProps): React.ReactElement {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [inputValue, setInputValue] = useState('');
@@ -34,15 +46,16 @@ export default function NotesClient(): React.ReactElement {
     debouncedSetSearch(query);
   };
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['notes', { tag: tagFilter, page, perPage, search }],
-    queryFn: () => getNotes({ tag: tagFilter, page, perPage, search }),
+  // Використовуємо дженерік <NotesResponse> для useQuery
+  const { data, isLoading, isError } = useQuery<NotesResponse>({
+    queryKey: ['notes', { tag, page, perPage, search }],
+    queryFn: () => getNotes({ tag, page, perPage, search }),
     placeholderData: (previousData) => previousData,
-    staleTime: 1000 * 60,
   });
 
-  const notes = Array.isArray(data) ? data : (data as any)?.notes || [];
-  const totalPages = (data as any)?.totalPages || 1;
+  // Строга типізація без жодних `as any`
+  const notes: Note[] = data?.notes ?? [];
+  const totalPages: number = data?.totalPages ?? 1;
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
